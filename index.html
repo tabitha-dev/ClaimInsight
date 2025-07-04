@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claim Insights - Automated Medical Claim Denials Analysis & Prediction System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
+    <style>
+        /* Custom styles for select button SVG, if needed, but Tailwind handles most */
+        :root {
+            --select-button-svg: url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724px%27 height=%2724px%27 fill=%27rgb(96,117,138)%27 viewBox=%270 0 256 256%27%3e%3cpath d=%27M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34,42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z%27%3e%3c/path%3e%3c/svg%3e');
+        }
+        select {
+            background-image: var(--select-button-svg);
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5em 1.5em;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            padding-right: 2.5rem; /* Adjust padding to prevent text overlapping arrow */
+        }
+    </style>
+</head>
+<body class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style='font-family: Inter, "Noto Sans", sans-serif;'>
+
+    <div class="layout-container flex h-full grow flex-col">
+        <!-- Header -->
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f2f5] px-4 sm:px-10 py-3">
+            <div class="flex items-center gap-4 text-[#111418]">
+                <div class="size-4">
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fillRule="evenodd" clipRule="evenodd" d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z" fill="currentColor"></path>
+                        <path fillRule="evenodd" clipRule="evenodd" d="M24 8.18819L33.4123 11.574L24 15.2071L14.5877 11.574L24 8.18819ZM9 15.8487L21 20.4805V37.6263L9 32.9945V15.8487ZM27 37.6263V20.4805L39 15.8487V32.9945L27 37.6263ZM25.354 2.29885C24.4788 1.98402 23.5212 1.98402 22.646 2.29885L4.98454 8.65208C3.7939 9.08038 3 10.2097 3 11.475V34.3663C3 36.0196 4.01719 37.5026 5.55962 38.098L22.9197 44.7987C23.6149 45.0671 24.3851 45.0671 25.0803 44.7987L42.4404 38.098C43.9828 37.5026 45 36.0196 45 34.3663V11.475C45 10.2097 44.2061 9.08038 43.0155 8.65208L25.354 2.29885Z" fill="currentColor"></path>
+                    </svg>
+                </div>
+                <h2 class="text-[#111418] text-lg font-bold leading-tight tracking-[-0.015em]">Claim Insights</h2>
+            </div>
+            <div class="flex flex-1 justify-end gap-4 sm:gap-8">
+                <div class="hidden sm:flex items-center gap-4 sm:gap-9">
+                    <a class="text-[#111418] text-sm font-medium leading-normal cursor-pointer" onclick="navigateTo('dashboard')">Dashboard</a>
+                    <a class="text-[#111418] text-sm font-medium leading-normal cursor-pointer" onclick="navigateTo('denials_analysis')">Denials Analysis</a>
+                    <a class="text-[#111418] text-sm font-medium leading-normal cursor-pointer" onclick="navigateTo('new_claim_prediction')">Predictions</a>
+                    <a class="text-[#111418] text-sm font-medium leading-normal cursor-pointer" onclick="navigateTo('reports')">Reports</a>
+                    <a class="text-[#111418] text-sm font-medium leading-normal cursor-pointer" onclick="navigateTo('settings_system_parameters')">Settings</a>
+                </div>
+                <button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#f0f2f5] text-[#111418] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+                    <div class="text-[#111418]" data-icon="Bell" data-size="20px" data-weight="regular">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor" viewBox="0 0 256 256">
+                            <path d="M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z"></path>
+                        </svg>
+                    </div>
+                </button>
+                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC-ezCxkMohxJG4WBE2EOOuIkOnywvUIq3-RVtiIaplhP_fTczxXHqIHWKmCH3RSN7I0FcsY0fjQ_d3BcqKVsmrKC_MyMOfu7DhQRykVMXrJXluyBu1-bD5JLcRFK6rjj2Cn2mW73-5OFRulCw4oBK7Kd4-icyALGGS2_rm8guyH5uweGvXKwUARuBuT8hxY881MBNGOwpi-J8IV4QfpiZW5kCHrvMuftKCEsLgZsYo_o6MCsKDYXgtHhGREdvawaDQ1Y8WUNBjulQ")'></div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="px-4 sm:px-40 flex flex-1 justify-center py-5">
+            <div id="dashboard-page" class="layout-content-container flex flex-col max-w-[960px] flex-1">
+                <div class="flex flex-wrap justify-between gap-3 p-4">
+                    <div class="flex min-w-72 flex-col gap-3">
+                        <p class="text-[#111418] tracking-light text-[32px] font-bold leading-tight">Dashboard</p>
+                        <p class="text-[#60758a] text-sm font-normal leading-normal">Overview of claim denial trends and system performance</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-4 p-4">
+                    <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 bg-[#f0f2f5]">
+                        <p class="text-[#111418] text-base font-medium leading-normal">Denial Rate</p>
+                        <p class="text-[#111418] tracking-light text-2xl font-bold leading-tight">8.2%</p>
+                        <p class="text-[#e73908] text-base font-medium leading-normal">-1.5%</p>
+                    </div>
+                    <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 bg-[#f0f2f5]">
+                        <p class="text-[#111418] text-base font-medium leading-normal">Revenue Lost</p>
+                        <p class="text-[#111418] tracking-light text-2xl font-bold leading-tight">$1.2M</p>
+                        <p class="text-[#078838] text-base font-medium leading-normal">+5%</p>
+                    </div>
+                    <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 bg-[#f0f2f5]">
+                        <p class="text-[#111418] text-base font-medium leading-normal">Claims Processed</p>
+                        <p class="text-[#111418] tracking-light text-2xl font-bold leading-tight">15,000</p>
+                        <p class="text-[#078838] text-base font-medium leading-normal">+10%</p>
+                    </div>
+                    <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 bg-[#f0f2f5]">
+                        <p class="text-[#111418] text-base font-medium leading-normal">Revenue Recovered</p>
+                        <p class="text-[#111418] tracking-light text-2xl font-bold leading-tight">$850K</p>
+                        <p class="text-[#078838] text-base font-medium leading-normal">+12%</p>
+                    </div>
+                </div>
+                <h2 class="text-[#111418] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Denial Trends</h2>
+                <div class="flex flex-wrap gap-4 px-4 py-6">
+                    <div class="flex min-w-72 flex-1 flex-col gap-2 rounded-lg border border-[#dbe0e6] p-6">
+                        <p class="text-[#111418] text-base font-medium leading-normal">Denial Rate Over Time</p>
+                        <p class="text-[#111418] tracking-light text-[32px] font-bold leading-tight truncate">8.2%</p>
+                        <div class="flex gap-1">
+                            <p class="text-[#60758a] text-base font-normal leading-normal">Last 12 Months</p>
+                            <p class="text-[#e73908] text-base font-medium leading-normal">-1.5%</p>
+                        </div>
+                        <div class="w-full h-[180px] py-4">
+                            <svg id="denial-rate-chart" width="100%" height="100%" viewBox="0 0 478 150" preserveAspectRatio="none"></svg>
+                        </div>
+                    </div>
+                    <div class="flex min-w-72 flex-1 flex-col gap-2 rounded-lg border border-[#dbe0e6] p-6">
+                        <p class="text-[#111418] text-base font-medium leading-normal">Denials by Reason</p>
+                        <p class="text-[#111418] tracking-light text-[32px] font-bold leading-tight truncate">15,000</p>
+                        <div class="flex gap-1">
+                            <p class="text-[#60758a] text-base font-normal leading-normal">Last Quarter</p>
+                            <p class="text-[#078838] text-base font-medium leading-normal">+10%</p>
+                        </div>
+                        <div class="w-full h-[180px] py-4">
+                            <svg id="denials-by-reason-chart" width="100%" height="100%" viewBox="0 0 478 150" preserveAspectRatio="none"></svg>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="text-[#111418] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Aged Accounts Receivable</h2>
+                <div class="flex flex-wrap gap-4 px-4 py-6">
+                    <div class="flex min-w-72 flex-1 flex-col gap-2 rounded-lg border border-[#dbe0e6] p-6">
+                        <p class="text-[#111418] text-base font-medium leading-normal">Outstanding Claims by Age</p>
+                        <p class="text-[#111418] tracking-light text-[32px] font-bold leading-tight truncate">$625,000</p>
+                        <div class="flex gap-1">
+                            <p class="text-[#60758a] text-base font-normal leading-normal">Total Outstanding</p>
+                        </div>
+                        <div class="w-full h-[180px] py-4">
+                            <svg id="aged-ar-chart" width="100%" height="100%" viewBox="0 0 478 150" preserveAspectRatio="none"></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="denials-analysis-page" class="layout-content-container flex flex-col max-w-[960px] flex-1 hidden">
+                <div class="flex flex-wrap justify-between gap-3 p-4">
+                    <div class="flex min-w-72 flex-col gap-3">
+                        <p class="text-[#111418] tracking-light text-[32px] font-bold leading-tight">Denials Analysis</p>
+                        <p class="text-[#60758a] text-sm font-normal leading-normal">Analyze historical denial data to identify trends and patterns.</p>
+                    </div>
+                </div>
+                <h2 class="text-[#111418] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Overall Denial Trends</h2>
+                <div class="flex flex-wrap gap-4 px-4 py-6">
+                    <div class="flex min-w-72 flex-1 flex-col gap-2 rounded-lg border border-[#dbe0e6] p-6">
+                        <p class="text-[#111418] text-base font-medium leading-normal">Denial Rate Over Time</p>
+                        <p class="text-[#111418] tracking-light text-[32px] font-bold leading-tight truncate">12%</p>
+                        <div class="flex gap-1">
+                            <p class="text-[#60758a] text-base font-normal leading-normal">Last 12 Months</p>
+                            <p class="text-[#e73908] text-base font-medium leading-normal">-2%</p>
+                        </div>
+                        <div class="w-full h-[180px] py-4">
+                            <svg id="denials-analysis-chart" width="100%" height="100%" viewBox="0 0 478 150" preserveAspectRatio="none"></svg>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="text-[#111418] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Common Denial Reasons</h2>
+                <div class="px-4 py-3 @container">
+                    <div class="flex overflow-hidden rounded-lg border border-[#dbe0e6] bg-white">
+                        <table class="flex-1">
+                            <thead>
+                                <tr class="bg-white">
+                                    <th class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-120 px-4 py-3 text-left text-[#111418] w-[400px] text-sm font-medium leading-normal">
+                                        Denial Reason
+                                    </th>
+                                    <th class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-240 px-4 py-3 text-left text-[#111418] w-[400px] text-sm font-medium leading-normal">
+                                        Number of Denials
+                                    </th>
+                                    <th class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-360 px-4 py-3 text-left text-[#111418] w-[400px] text-sm font-medium leading-normal">
+                                        Percentage
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-t border-t-[#dbe0e6]">
+                                    <td class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-120 h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal leading-normal">
+                                        Missing Information
+                                    </td>
+                                    <td class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-240 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">250</td>
+                                    <td class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-360 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">30%</td>
+                                </tr>
+                                <tr class="border-t border-t-[#dbe0e6]">
+                                    <td class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-120 h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal leading-normal">
+                                        Non-Covered Service
+                                    </td>
+                                    <td class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-240 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">200</td>
+                                    <td class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-360 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">24%</td>
+                                </tr>
+                                <tr class="border-t border-t-[#dbe0e6]">
+                                    <td class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-120 h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal leading-normal">
+                                        Prior Authorization Required
+                                    </td>
+                                    <td class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-240 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">150</td>
+                                    <td class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-360 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">18%</td>
+                                </tr>
+                                <tr class="border-t border-t-[#dbe0e6]">
+                                    <td class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-120 h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal leading-normal">
+                                        Incorrect Coding
+                                    </td>
+                                    <td class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-240 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">100</td>
+                                    <td class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-360 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">12%</td>
+                                </tr>
+                                <tr class="border-t border-t-[#dbe0e6]">
+                                    <td class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-120 h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal leading-normal">
+                                        Duplicate Claim
+                                    </td>
+                                    <td class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-240 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">50</td>
+                                    <td class="table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-360 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">6%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <style>
+                        @container(max-width:120px){.table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-120{display: none;}}
+                        @container(max-width:240px){.table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-240{display: none;}}
+                        @container(max-width:360px){.table-f72d3480-0abd-4ca2-a317-e2fe991c36b4-column-360{display: none;}}
+                    </style>
+                </div>
+                <h2 class="text-[#111418] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Payer-Specific Denial Patterns</h2>
+                <div class="px-4 py-3 @container">
+                    <div class="flex overflow-hidden rounded-lg border border-[#dbe0e6] bg-white">
+                        <table class="flex-1">
+                            <thead>
+                                <tr class="bg-white">
+                                    <th class="table-d467028d-2e05-494f-aad4-27b74f969ed3-column-120 px-4 py-3 text-left text-[#111418] w-[400px] text-sm font-medium leading-normal">Payer</th>
+                                    <th class="table-d467028d-2e05-494f-aad4-27b74f969ed3-column-240 px-4 py-3 text-left text-[#111418] w-[400px] text-sm font-medium leading-normal">
+                                        Denial Rate
+                                    </th>
+                                    <th class="table-d467028d-2e05-494f-aad4-27b74f969ed3-column-360 px-4 py-3 text-left text-[#111418] w-[400px] text-sm font-medium leading-normal">
+                                        Common Reasons
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-t border-t-[#dbe0e6]">
+                                    <td class="table-d467028d-2e05-494f-aad4-27b74f969ed3-column-120 h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal leading-normal">Medicare</td>
+                                    <td class="table-d467028d-2e05-494f-aad4-27b74f969ed3-column-240 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">15%</td>
+                                    <td class="table-d467028d-2e05-494f-aad4-27b74f969ed3-column-360 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">
+                                        Missing Information, Non-Covered Service
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dbe0e6]">
+                                    <td class="table-d467028d-2e05-494f-aad4-27b74f969ed3-column-120 h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal leading-normal">
+                                        Blue Cross
+                                    </td>
+                                    <td class="table-d467028d-2e05-494f-aad4-27b74f969ed3-column-240 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">10%</td>
+                                    <td class="table-d467028d-2e05-494f-aad4-27b74f969ed3-column-360 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">
+                                        Prior Authorization Required, Incorrect Coding
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dbe0e6]">
+                                    <td class="table-d467028d-2e05-494f-aad4-27b74f969ed3-column-120 h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal leading-normal">
+                                        United Healthcare
+                                    </td>
+                                    <td class="table-d467028d-2e05-494f-aad4-27b74f969ed3-column-240 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">8%</td>
+                                    <td class="table-d467028d-2e05-494f-aad4-27b74f969ed3-column-360 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">
+                                        Duplicate Claim, Missing Information
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <style>
+                        @container(max-width:120px){.table-d467028d-2e05-494f-aad4-27b74f969ed3-column-120{display: none;}}
+                        @container(max-width:240px){.table-d467028d-2e05-494f-aad4-27b74f969ed3-column-240{display: none;}}
+                        @container(max-width:360px){.table-d467028d-2e05-494f-aad4-27b74f969ed3-column-360{display: none;}}
+                    </style>
+                </div>
+            </div>
+
+            <div id="new-claim-prediction-page" class="layout-content-container flex flex-col w-full sm:w-[512px] max-w-[960px] flex-1 py-5 hidden">
+                <div class="flex flex-wrap justify-between gap-3 p-4">
+                    <p class="text-[#111418] tracking-light text-[32px] font-bold leading-tight min-w-72">New Claim Prediction</p>
+                </div>
+                <div class="flex flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#111418] text-base font-medium leading-normal pb-2">Claim ID</p>
+                        <input id="claim-id-input" placeholder="Enter Claim ID" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] focus:outline-0 focus:ring-0 border-none bg-[#f0f2f5] focus:border-none h-14 placeholder:text-[#60758a] p-4 text-base font-normal leading-normal" />
+                    </label>
+                </div>
+                <div class="flex flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#111418] text-base font-medium leading-normal pb-2">Patient ID</p>
+                        <input id="patient-id-input" placeholder="Enter Patient ID" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] focus:outline-0 focus:ring-0 border-none bg-[#f0f2f5] focus:border-none h-14 placeholder:text-[#60758a] p-4 text-base font-normal leading-normal" />
+                    </label>
+                </div>
+                <div class="flex flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#111418] text-base font-medium leading-normal pb-2">Provider ID</p>
+                        <input id="provider-id-input" placeholder="Enter Provider ID" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] focus:outline-0 focus:ring-0 border-none bg-[#f0f2f5] focus:border-none h-14 placeholder:text-[#60758a] p-4 text-base font-normal leading-normal" />
+                    </label>
+                </div>
+                <div class="flex flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#111418] text-base font-medium leading-normal pb-2">Service Type</p>
+                        <select id="service-type-select" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] focus:outline-0 focus:ring-0 border-none bg-[#f0f2f5] focus:border-none h-14 bg-[image:var(--select-button-svg)] bg-right bg-no-repeat appearance-none pr-10 placeholder:text-[#60758a] p-4 text-base font-normal leading-normal">
+                            <option value="one">Select Service Type</option>
+                            <option value="Consultation">Consultation</option>
+                            <option value="Procedure">Procedure</option>
+                            <option value="Diagnostic Test">Diagnostic Test</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="flex flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#111418] text-base font-medium leading-normal pb-2">Diagnosis Code</p>
+                        <select id="diagnosis-code-select" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] focus:outline-0 focus:ring-0 border-none bg-[#f0f2f5] focus:border-none h-14 bg-[image:var(--select-button-svg)] bg-right bg-no-repeat appearance-none pr-10 placeholder:text-[#60758a] p-4 text-base font-normal leading-normal">
+                            <option value="one">Select Diagnosis Code</option>
+                            <option value="J20.9 (Acute Bronchitis)">J20.9 (Acute Bronchitis)</option>
+                            <option value="I10 (Essential Hypertension)">I10 (Essential Hypertension)</option>
+                            <option value="E11.9 (Type 2 Diabetes)">E11.9 (Type 2 Diabetes)</option>
+                        </select>
+                    </label>
+                </div>
+                <div id="payer-rule-message" class="text-[#60758a] text-sm font-normal leading-normal px-4 py-2 bg-[#e0e6ed] rounded-lg mx-4 hidden"></div>
+                <div class="flex flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#111418] text-base font-medium leading-normal pb-2">Claim Amount</p>
+                        <input id="claim-amount-input" placeholder="Enter Claim Amount" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] focus:outline-0 focus:ring-0 border-none bg-[#f0f2f5] focus:border-none h-14 placeholder:text-[#60758a] p-4 text-base font-normal leading-normal" />
+                    </label>
+                </div>
+                <div class="flex flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#111418] text-base font-medium leading-normal pb-2">Insurance Plan</p>
+                        <select id="insurance-plan-select" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] focus:outline-0 focus:ring-0 border-none bg-[#f0f2f5] focus:border-none h-14 bg-[image:var(--select-button-svg)] bg-right bg-no-repeat appearance-none pr-10 placeholder:text-[#60758a] p-4 text-base font-normal leading-normal">
+                            <option value="one">Select Insurance Plan</option>
+                            <option value="Medicare">Medicare</option>
+                            <option value="Blue Cross">Blue Cross</option>
+                            <option value="United Healthcare">United Healthcare</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="flex px-4 py-3 justify-start gap-4">
+                    <button id="estimate-responsibility-btn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#e0e6ed] text-[#111418] text-sm font-bold leading-normal tracking-[0.015em]">
+                        <span class="truncate">Estimate Patient Responsibility</span>
+                    </button>
+                    <p id="patient-responsibility-display" class="text-[#111418] text-base font-medium leading-normal py-2 hidden">
+                        Estimated: <span class="font-bold"></span>
+                    </p>
+                </div>
+                <div class="flex px-4 py-3 justify-start">
+                    <button id="simulate-scrubbing-btn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#e0e6ed] text-[#111418] text-sm font-bold leading-normal tracking-[0.015em]">
+                        <span class="truncate">Simulate Claim Scrubbing</span>
+                    </button>
+                </div>
+                <div id="scrubbing-warnings" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mx-4 my-2 hidden" role="alert">
+                    <strong class="font-bold">Scrubbing Warnings:</strong>
+                    <ul class="mt-2 list-disc list-inside"></ul>
+                </div>
+                <div class="flex px-4 py-3 justify-end">
+                    <button id="predict-denial-risk-btn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#3d98f4] text-white text-sm font-bold leading-normal tracking-[0.015em]">
+                        <span class="truncate">Predict Denial Risk</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="claim-prediction-results-page" class="layout-content-container flex flex-col max-w-[960px] flex-1 hidden">
+                <div class="flex flex-wrap justify-between gap-3 p-4">
+                    <div class="flex min-w-72 flex-col gap-3">
+                        <p class="text-[#111418] tracking-light text-[32px] font-bold leading-tight">Claim Prediction Results</p>
+                        <p class="text-[#60758a] text-sm font-normal leading-normal">Review the prediction for this claim and take necessary actions.</p>
+                    </div>
+                </div>
+                <h2 class="text-[#111418] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Claim Details</h2>
+                <div class="p-4 grid grid-cols-1 sm:grid-cols-2">
+                    <div class="flex flex-col gap-1 border-t border-solid border-t-[#dbe0e6] py-4 pr-2">
+                        <p class="text-[#60758a] text-sm font-normal leading-normal">Claim ID</p>
+                        <p id="result-claim-id" class="text-[#111418] text-sm font-normal leading-normal"></p>
+                    </div>
+                    <div class="flex flex-col gap-1 border-t border-solid border-t-[#dbe0e6] py-4 pl-2">
+                        <p class="text-[#60758a] text-sm font-normal leading-normal">Patient ID</p>
+                        <p id="result-patient-id" class="text-[#111418] text-sm font-normal leading-normal"></p>
+                    </div>
+                    <div class="flex flex-col gap-1 border-t border-solid border-t-[#dbe0e6] py-4 pr-2">
+                        <p class="text-[#60758a] text-sm font-normal leading-normal">Provider ID</p>
+                        <p id="result-provider-id" class="text-[#111418] text-sm font-normal leading-normal"></p>
+                    </div>
+                    <div class="flex flex-col gap-1 border-t border-solid border-t-[#dbe0e6] py-4 pl-2">
+                        <p class="text-[#60758a] text-sm font-normal leading-normal">Service Type</p>
+                        <p id="result-service-type" class="text-[#111418] text-sm font-normal leading-normal"></p>
+                    </div>
+                    <div class="flex flex-col gap-1 border-t border-solid border-t-[#dbe0e6] py-4 pr-2">
+                        <p class="text-[#60758a] text-sm font-normal leading-normal">Claim Amount</p>
+                        <p id="result-claim-amount" class="text-[#111418] text-sm font-normal leading-normal"></p>
+                    </div>
+                    <div class="flex flex-col gap-1 border-t border-solid border-t-[#dbe0e6] py-4 pl-2">
+                        <p class="text-[#60758a] text-sm font-normal leading-normal">Diagnosis Code</p>
+                        <p id="result-diagnosis-code" class="text-[#111418] text-sm font-normal leading-normal"></p>
+                    </div>
+                    <div class="flex flex-col gap-1 border-t border-solid border-t-[#dbe0e6] py-4 pr-2">
+                        <p class="text-[#60758a] text-sm font-normal leading-normal">Insurance Plan</p>
+                        <p id="result-insurance-plan" class="text-[#111418] text-sm font-normal leading-normal"></p>
+                    </div>
+                    <div class="flex flex-col gap-1 border-t border-solid border-t-[#dbe0e6] py-4 pl-2">
+                        <p class="text-[#60758a] text-sm font-normal leading-normal">Status</p>
+                        <p id="result-status" class="text-[#111418] text-sm font-normal leading-normal"></p>
+                    </div>
+                </div>
+                <h2 class="text-[#111418] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Prediction Result</h2>
+                <div class="flex flex-wrap gap-4 p-4">
+                    <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 bg-[#f0f2f5]">
+                        <p class="text-[#111418] text-base font-medium leading-normal">Denial Risk</p>
+                        <p id="result-denial-risk" class="tracking-light text-2xl font-bold leading-tight"></p>
+                    </div>
+                </div>
+                <h2 class="text-[#111418] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Explanation</h2>
+                <p id="result-explanation" class="text-[#111418] text-base font-normal leading-normal pb-3 pt-1 px-4"></p>
+                <div id="result-recommendations"></div>
+                <div class="flex px-4 py-3 justify-end">
+                    <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#3d98f4] text-white text-sm font-bold leading-normal tracking-[0.015em]" onclick="console.log('Submit Claim clicked')">
+                        <span class="truncate">Submit Claim</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="datasets-page" class="layout-content-container flex flex-col max-w-[960px] flex-1 hidden">
+                <div class="flex flex-wrap justify-between gap-3 p-4">
+                    <div class="flex min-w-72 flex-col gap-3">
+                        <p class="text-[#111418] tracking-light text-[32px] font-bold leading-tight">Datasets</p>
+                        <p class="text-[#60758a] text-sm font-normal leading-normal">Manage your datasets and track their processing status.</p>
+                    </div>
+                </div>
+                <h3 class="text-[#111418] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">Upload New Dataset</h3>
+                <div class="flex flex-col p-4">
+                    <div class="flex flex-col items-center gap-6 rounded-lg border-2 border-dashed border-[#dbe0e6] px-6 py-14">
+                        <div class="flex max-w-[480px] flex-col items-center gap-2">
+                            <p class="text-[#111418] text-lg font-bold leading-tight tracking-[-0.015em] max-w-[480px] text-center">Drag and drop or browse to upload</p>
+                            <p class="text-[#111418] text-sm font-normal leading-normal max-w-[480px] text-center">Supported file types: CSV, XLSX</p>
+                        </div>
+                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#f0f2f5] text-[#111418] text-sm font-bold leading-normal tracking-[0.015em]" onclick="console.log('Browse Files clicked')">
+                            <span class="truncate">Browse Files</span>
+                        </button>
+                    </div>
+                </div>
+                <h3 class="text-[#111418] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">Existing Datasets</h3>
+                <div class="px-4 py-3 @container">
+                    <div class="flex overflow-hidden rounded-lg border border-[#dbe0e6] bg-white">
+                        <table class="flex-1">
+                            <thead>
+                                <tr class="bg-white">
+                                    <th class="table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-120 px-4 py-3 text-left text-[#111418] w-[400px] text-sm font-medium leading-normal">
+                                        Dataset Name
+                                    </th>
+                                    <th class="table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-240 px-4 py-3 text-left text-[#111418] w-[400px] text-sm font-medium leading-normal">
+                                        Upload Date
+                                    </th>
+                                    <th class="table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-360 px-4 py-3 text-left text-[#111418] w-60 text-sm font-medium leading-normal">Status</th>
+                                    <th class="table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-480 px-4 py-3 text-left text-[#111418] w-60 text-[#60758a] text-sm font-medium leading-normal">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-t border-t-[#dbe0e6]">
+                                    <td class="table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-120 h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal leading-normal">
+                                        Claims Data 2023
+                                    </td>
+                                    <td class="table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-240 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">
+                                        2023-11-15
+                                    </td>
+                                    <td class="table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-360 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-[#f0f2f5] text-[#111418] text-sm font-medium leading-normal w-full" onclick="console.log('Processed button clicked for Claims Data 2023')">
+                                            <span class="truncate">Processed</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-480 h-[72px] px-4 py-2 w-60 text-[#60758a] text-sm font-bold leading-normal tracking-[0.015em]">
+                                        View Details
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dbe0e6]">
+                                    <td class="table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-120 h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal leading-normal">
+                                        Claims Data 2022
+                                    </td>
+                                    <td class="table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-240 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">
+                                        2023-11-10
+                                    </td>
+                                    <td class="table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-360 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-[#f0f2f5] text-[#111418] text-sm font-medium leading-normal w-full" onclick="console.log('Processing button clicked for Claims Data 2022')">
+                                            <span class="truncate">Processing</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-480 h-[72px] px-4 py-2 w-60 text-[#60758a] text-sm font-bold leading-normal tracking-[0.015em]">
+                                        View Details
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dbe0e6]">
+                                    <td class="table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-120 h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal leading-normal">
+                                        Claims Data 2021
+                                    </td>
+                                    <td class="table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-240 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">
+                                        2023-11-05
+                                    </td>
+                                    <td class="table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-360 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-[#f0f2f5] text-[#111418] text-sm font-medium leading-normal w-full" onclick="console.log('Failed button clicked for Claims Data 2021')">
+                                            <span class="truncate">Failed</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-480 h-[72px] px-4 py-2 w-60 text-[#60758a] text-sm font-bold leading-normal tracking-[0.015em]">
+                                        View Details
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <style>
+                        @container(max-width:120px){.table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-120{display: none;}}
+                        @container(max-width:240px){.table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-240{display: none;}}
+                        @container(max-width:360px){.table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-360{display: none;}}
+                        @container(max-width:480px){.table-84604239-c8c2-4c5b-9a9e-9ec5d4e388c9-column-480{display: none;}}
+                    </style>
+                </div>
+            </div>
+
+            <div id="settings-system-parameters-page" class="layout-content-container flex flex-col max-w-[960px] flex-1 hidden">
+                <div class="flex flex-wrap justify-between gap-3 p-4">
+                    <div class="flex min-w-72 flex-col gap-3">
+                        <p class="text-[#111418] tracking-light text-[32px] font-bold leading-tight">Settings</p>
+                    </div>
+                </div>
+                <div class="pb-3">
+                    <div class="flex border-b border-[#dbe0e6] px-4 gap-8">
+                        <a class="flex flex-col items-center justify-center border-b-[3px] border-b-[#111418] text-[#111418] pb-[13px] pt-4 cursor-pointer" onclick="navigateTo('settings_system_parameters')">
+                            <p class="text-[#111418] text-sm font-bold leading-normal tracking-[0.015em]">System Parameters</p>
+                        </a>
+                        <a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#60758a] pb-[13px] pt-4 cursor-pointer" onclick="navigateTo('settings_payer_rules')">
+                            <p class="text-[#60758a] text-sm font-bold leading-normal tracking-[0.015em]">Payer Rules</p>
+                        </a>
+                        <a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#60758a] pb-[13px] pt-4 cursor-pointer" onclick="navigateTo('user_management')">
+                            <p class="text-[#60758a] text-sm font-bold leading-normal tracking-[0.015em]">Account</p>
+                        </a>
+                    </div>
+                </div>
+                <h2 class="text-[#111418] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">System Parameters</h2>
+                <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#111418] text-base font-medium leading-normal pb-2">Denial Threshold</p>
+                        <input id="denial-threshold-input" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] focus:outline-0 focus:ring-0 border border-[#dbe0e6] bg-white focus:border-[#dbe0e6] h-14 placeholder:text-[#60758a] p-[15px] text-base font-normal leading-normal" />
+                    </label>
+                </div>
+                <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#111418] text-base font-medium leading-normal pb-2">Prediction Model Version</p>
+                        <input id="prediction-model-version-input" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] focus:outline-0 focus:ring-0 border border-[#dbe0e6] bg-white focus:border-[#dbe0e6] h-14 placeholder:text-[#60758a] p-[15px] text-base font-normal leading-normal" />
+                    </label>
+                </div>
+                <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#111418] text-base font-medium leading-normal pb-2">Data Source</p>
+                        <input id="data-source-input" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] focus:outline-0 focus:ring-0 border border-[#dbe0e6] bg-white focus:border-[#dbe0e6] h-14 placeholder:text-[#60758a] p-[15px] text-base font-normal leading-normal" />
+                    </label>
+                </div>
+                <div class="flex px-4 py-3 justify-start">
+                    <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#3d98f4] text-white text-sm font-bold leading-normal tracking-[0.015em]" onclick="handleUpdateParameters()">
+                        <span class="truncate">Update Parameters</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="settings-payer-rules-page" class="layout-content-container flex flex-col max-w-[960px] flex-1 hidden">
+                <div class="flex flex-wrap justify-between gap-3 p-4">
+                    <p class="text-[#121417] tracking-light text-[32px] font-bold leading-tight">Payer Rules &amp; Guidelines</p>
+                    <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-8 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-medium leading-normal" onclick="console.log('Add New Rule clicked')">
+                        <span class="truncate">Add New Rule</span>
+                    </button>
+                </div>
+                <div class="pb-3">
+                    <div class="flex border-b border-[#dbe0e6] px-4 gap-8">
+                        <a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#60758a] pb-[13px] pt-4 cursor-pointer" onclick="navigateTo('settings_system_parameters')">
+                            <p class="text-[#60758a] text-sm font-bold leading-normal tracking-[0.015em]">System Parameters</p>
+                        </a>
+                        <a class="flex flex-col items-center justify-center border-b-[3px] border-b-[#111418] text-[#111418] pb-[13px] pt-4 cursor-pointer" onclick="navigateTo('settings_payer_rules')">
+                            <p class="text-[#111418] text-sm font-bold leading-normal tracking-[0.015em]">Payer Rules</p>
+                        </a>
+                        <a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#60758a] pb-[13px] pt-4 cursor-pointer" onclick="navigateTo('user_management')">
+                            <p class="text-[#60758a] text-sm font-bold leading-normal tracking-[0.015em]">Account</p>
+                        </a>
+                    </div>
+                </div>
+                <h3 class="text-[#121417] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">Filter by</h3>
+                <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <select id="payer-filter-select" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#121417] focus:outline-0 focus:ring-0 border border-[#dde0e4] bg-white focus:border-[#dde0e4] h-14 bg-[image:var(--select-button-svg)] bg-right bg-no-repeat appearance-none pr-10 placeholder:text-[#677583] p-[15px] text-base font-normal leading-normal">
+                            <option value="one">Payer</option>
+                            <option value="two">Payer A</option>
+                            <option value="three">Payer B</option>
+                            <option value="four">Payer C</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#121417] text-base font-medium leading-normal pb-2">Service</p>
+                        <select id="service-filter-select" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#121417] focus:outline-0 focus:ring-0 border border-[#dde0e4] bg-white focus:border-[#dde0e4] h-14 bg-[image:var(--select-button-svg)] bg-right bg-no-repeat appearance-none pr-10 placeholder:text-[#677583] p-[15px] text-base font-normal leading-normal">
+                            <option value="one">Service</option>
+                            <option value="two">Inpatient Care</option>
+                            <option value="three">Outpatient Surgery</option>
+                            <option value="four">Diagnostic Testing</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#121417] text-base font-medium leading-normal pb-2">Denial Reason</p>
+                        <select id="denial-reason-filter-select" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#121417] focus:outline-0 focus:ring-0 border border-[#dde0e4] bg-white focus:border-[#dde0e4] h-14 bg-[image:var(--select-button-svg)] bg-right bg-no-repeat appearance-none pr-10 placeholder:text-[#677583] p-[15px] text-base font-normal leading-normal">
+                            <option value="one">Denial Reason</option>
+                            <option value="two">Lack of Medical Necessity</option>
+                            <option value="three">Incorrect Coding</option>
+                            <option value="four">Insufficient Documentation</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#121417] text-base font-medium leading-normal pb-2">Status</p>
+                        <select id="status-filter-select" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#121417] focus:outline-0 focus:ring-0 border border-[#dde0e4] bg-white focus:border-[#dde0e4] h-14 bg-[image:var(--select-button-svg)] bg-right bg-no-repeat appearance-none pr-10 placeholder:text-[#677583] p-[15px] text-base font-normal leading-normal">
+                            <option value="one">Status</option>
+                            <option value="two">Active</option>
+                            <option value="three">Inactive</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="flex px-4 py-3 justify-end">
+                    <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#d2e2f3] text-[#121417] text-sm font-bold leading-normal tracking-[0.015em]" onclick="handleApplyFilters()">
+                        <span class="truncate">Apply Filters</span>
+                    </button>
+                </div>
+                <div class="px-4 py-3 @container">
+                    <div class="flex overflow-hidden rounded-xl border border-[#dde0e4] bg-white">
+                        <table class="flex-1">
+                            <thead>
+                                <tr class="bg-white">
+                                    <th class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-120 px-4 py-3 text-left text-[#121417] w-[400px] text-sm font-medium leading-normal">Payer</th>
+                                    <th class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-240 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">Service</th>
+                                    <th class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-360 px-4 py-3 text-left text-[#121417] w-[400px] text-sm font-medium leading-normal">
+                                        Denial Reason
+                                    </th>
+                                    <th class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-480 px-4 py-3 text-left text-[#121417] w-[400px] text-sm font-medium leading-normal">
+                                        Rule Description
+                                    </th>
+                                    <th class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-600 h-[72px] px-4 py-2 w-60 text-sm font-medium leading-normal">Status</th>
+                                    <th class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-720 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Last Updated
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">Payer A</td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Inpatient Care
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-360 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Lack of Medical Necessity
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-480 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Rule 1: Inpatient care requires prior authorization and must be deemed medically necessary by the payer's review team.
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-600 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-8 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-medium leading-normal w-full" onclick="console.log('Active button clicked for Payer A')">
+                                            <span class="truncate">Active</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-720 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        2023-08-15
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">Payer B</td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Outpatient Surgery
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-360 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Incorrect Coding
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-480 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Rule 2: Outpatient surgical procedures must be coded accurately using the latest ICD and CPT codes.
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-600 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-8 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-medium leading-normal w-full" onclick="console.log('Active button clicked for Payer B')">
+                                            <span class="truncate">Active</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-720 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        2023-07-22
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">Payer C</td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Diagnostic Testing
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-360 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Insufficient Documentation
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-480 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Rule 3: Diagnostic tests require complete and accurate documentation, including physician orders and test results.
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-600 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-8 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-medium leading-normal w-full" onclick="console.log('Active button clicked for Payer C')">
+                                            <span class="truncate">Active</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-720 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        2023-09-01
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">Payer A</td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Physical Therapy
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-360 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Exceeded Benefit Limits
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-480 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Rule 4: Physical therapy services are subject to annual benefit limits, which may vary based on the member's plan.
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-600 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-8 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-medium leading-normal w-full" onclick="console.log('Inactive button clicked for Payer A')">
+                                            <span class="truncate">Inactive</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-720 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        2023-06-10
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">Payer B</td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Mental Health Services
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-360 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Non-Covered Service
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-480 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Rule 5: Prescription medications must be on the payer's formulary to be covered at the lowest cost-sharing level.
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-600 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-8 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-medium leading-normal w-full" onclick="console.log('Active button clicked for Payer B')">
+                                            <span class="truncate">Active</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-720 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        2023-08-29
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">Payer C</td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Emergency Room Visits
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-360 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Inappropriate Use of ER
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-480 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Rule 6: Emergency room visits for non-emergency conditions may be subject to higher cost-sharing or denial.
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-600 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-8 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-medium leading-normal w-full" onclick="console.log('Active button clicked for Payer C')">
+                                            <span class="truncate">Active</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-720 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        2023-07-05
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">Payer A</td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Specialist Consultations
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-360 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Lack of Referral
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-480 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Rule 7: Specialist consultations often require a referral from a primary care physician.
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-600 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-8 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-medium leading-normal w-full" onclick="console.log('Active button clicked for Payer A')">
+                                            <span class="truncate">Active</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-720 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        2023-09-12
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">Payer B</td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Prescription Medications
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-360 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Non-Formulary Drug
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-480 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Rule 8: Prescription medications must be on the payer's formulary to be covered at the lowest cost-sharing level.
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-600 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-8 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-medium leading-normal w-full" onclick="console.log('Active button clicked for Payer B')">
+                                            <span class="truncate">Active</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-720 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        2023-06-28
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">Payer C</td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Durable Medical Equipment
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-360 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Prior Authorization Required
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-480 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Rule 9: Durable medical equipment requires prior authorization and may be subject to medical necessity review.
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-600 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-8 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-medium leading-normal w-full" onclick="console.log('Active button clicked for Payer C')">
+                                            <span class="truncate">Active</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-720 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        2023-08-03
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">Payer A</td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Preventive Care
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-360 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Frequency Limits
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-480 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Rule 10: Preventive care services, such as annual check-ups, have frequency limits based on age and gender.
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-600 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-8 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-medium leading-normal w-full" onclick="console.log('Active button clicked for Payer A')">
+                                            <span class="truncate">Active</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-720 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        2023-07-19
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <style>
+                        @container(max-width:120px){.table-783b51e4-d627-4da2-9a34-bef2556d717a-column-120{display: none;}}
+                        @container(max-width:240px){.table-783b51e4-d627-4da2-9a34-bef2556d717a-column-240{display: none;}}
+                        @container(max-width:360px){.table-783b51e4-d627-4da2-9a34-bef2556d717a-column-360{display: none;}}
+                        @container(max-width:480px){.table-783b51e4-d627-4da2-9a34-bef2556d717a-column-480{display: none;}}
+                        @container(max-width:600px){.table-783b51e4-d627-4da2-9a34-bef2556d717a-column-600{display: none;}}
+                        @container(max-width:720px){.table-783b51e4-d627-4da2-9a34-bef2556d717a-column-720{display: none;}}
+                    </style>
+                </div>
+                <div class="flex px-4 py-3 justify-start">
+                    <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-bold leading-normal tracking-[0.015em]" onclick="console.log('Add New Rule clicked')">
+                        <span class="truncate">Add New Rule</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="user-management-page" class="layout-content-container flex flex-col max-w-[960px] flex-1 hidden">
+                <div class="flex flex-wrap justify-between gap-3 p-4">
+                    <div class="flex min-w-72 flex-col gap-3">
+                        <p class="text-[#121417] tracking-light text-[32px] font-bold leading-tight">User Management</p>
+                        <p class="text-[#677583] text-sm font-normal leading-normal">Manage user roles and permissions within the system.</p>
+                    </div>
+                </div>
+                <div class="pb-3">
+                    <div class="flex border-b border-[#dbe0e6] px-4 gap-8">
+                        <a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#60758a] pb-[13px] pt-4 cursor-pointer" onclick="navigateTo('settings_system_parameters')">
+                            <p class="text-[#60758a] text-sm font-bold leading-normal tracking-[0.015em]">System Parameters</p>
+                        </a>
+                        <a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#60758a] pb-[13px] pt-4 cursor-pointer" onclick="navigateTo('settings_payer_rules')">
+                            <p class="text-[#60758a] text-sm font-bold leading-normal tracking-[0.015em]">Payer Rules</p>
+                        </a>
+                        <a class="flex flex-col items-center justify-center border-b-[3px] border-b-[#111418] text-[#111418] pb-[13px] pt-4 cursor-pointer" onclick="navigateTo('user_management')">
+                            <p class="text-[#111418] text-sm font-bold leading-normal tracking-[0.015em]">Account</p>
+                        </a>
+                    </div>
+                </div>
+                <h2 class="text-[#121417] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">User Roles</h2>
+                <div class="px-4 py-3 @container">
+                    <div class="flex overflow-hidden rounded-xl border border-[#dde0e4] bg-white">
+                        <table class="flex-1">
+                            <thead>
+                                <tr class="bg-white">
+                                    <th class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-120 px-4 py-3 text-left text-[#121417] w-[400px] text-sm font-medium leading-normal">User</th>
+                                    <th class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-240 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">Role</th>
+                                    <th class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-360 px-4 py-3 text-left text-[#121417] w-60 text-sm font-medium leading-normal">Status</th>
+                                    <th class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-480 px-4 py-3 text-left text-[#121417] w-60 text-[#677583] text-sm font-medium leading-normal">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">
+                                        Dr. Emily Carter
+                                    </td>
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
+                                        Administrator
+                                    </td>
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-360 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-8 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-medium leading-normal w-full" onclick="console.log('Active button clicked for Dr. Emily Carter')">
+                                            <span class="truncate">Active</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-480 h-[72px] px-4 py-2 w-60 text-[#677583] text-sm font-bold leading-normal tracking-[0.015em]">
+                                        Edit
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">
+                                        Dr. Robert Harris
+                                    </td>
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">Analyst</td>
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-360 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-8 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-medium leading-normal w-full" onclick="console.log('Active button clicked for Dr. Robert Harris')">
+                                            <span class="truncate">Active</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-480 h-[72px] px-4 py-2 w-60 text-[#677583] text-sm font-bold leading-normal tracking-[0.015em]">
+                                        Edit
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">
+                                        Dr. Olivia Bennett
+                                    </td>
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">Reviewer</td>
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-360 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-8 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-medium leading-normal w-full" onclick="console.log('Inactive button clicked for Dr. Olivia Bennett')">
+                                            <span class="truncate">Inactive</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-480 h-[72px] px-4 py-2 w-60 text-[#677583] text-sm font-bold leading-normal tracking-[0.015em]">
+                                        Edit
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">
+                                        Dr. Ethan Clark
+                                    </td>
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">Analyst</td>
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-360 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-8 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-medium leading-normal w-full" onclick="console.log('Active button clicked for Dr. Ethan Clark')">
+                                            <span class="truncate">Active</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-480 h-[72px] px-4 py-2 w-60 text-[#677583] text-sm font-bold leading-normal tracking-[0.015em]">
+                                        Edit
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">
+                                        Dr. Sophia Turner
+                                    </td>
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">Reviewer</td>
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-360 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-8 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-medium leading-normal w-full" onclick="console.log('Active button clicked for Dr. Sophia Turner')">
+                                            <span class="truncate">Active</span>
+                                        </button>
+                                    </td>
+                                    <td class="table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-480 h-[72px] px-4 py-2 w-60 text-[#677583] text-sm font-bold leading-normal tracking-[0.015em]">
+                                        Edit
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <style>
+                        @container(max-width:120px){.table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-120{display: none;}}
+                        @container(max-width:240px){.table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-240{display: none;}}
+                        @container(max-width:360px){.table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-360{display: none;}}
+                        @container(max-width:480px){.table-6d1b6f06-d4b1-409b-86e8-3e70bea90f20-column-480{display: none;}}
+                    </style>
+                </div>
+                <div class="flex px-4 py-3 justify-start">
+                    <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#d2e2f3] text-[#121417] text-sm font-bold leading-normal tracking-[0.015em]" onclick="console.log('Add New User clicked')">
+                        <span class="truncate">Add New User</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="reports-page" class="layout-content-container flex flex-col max-w-[960px] flex-1 hidden">
+                <div class="flex flex-wrap justify-between gap-3 p-4">
+                    <div class="flex min-w-72 flex-col gap-3">
+                        <p class="text-[#121417] tracking-light text-[32px] font-bold leading-tight">Reports</p>
+                        <p class="text-[#677583] text-sm font-normal leading-normal">
+                            Generate customized reports on denial trends, system performance, and other key metrics. Filter data and export reports in various formats.
+                        </p>
+                    </div>
+                </div>
+                <h2 class="text-[#121417] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Report Configuration</h2>
+                <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#121417] text-base font-medium leading-normal pb-2">Report Type</p>
+                        <select id="report-type-select" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#121417] focus:outline-0 focus:ring-0 border border-[#dde0e4] bg-white focus:border-[#dde0e4] h-14 bg-[image:var(--select-button-svg)] bg-right bg-no-repeat appearance-none pr-10 placeholder:text-[#677583] p-[15px] text-base font-normal leading-normal">
+                            <option value="one">Denial Trends Report</option>
+                            <option value="two">Payer Performance Report</option>
+                            <option value="three">Claim Volume Report</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#121417] text-base font-medium leading-normal pb-2">Date Range</p>
+                        <select id="date-range-select" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#121417] focus:outline-0 focus:ring-0 border border-[#dde0e4] bg-white focus:border-[#dde0e4] h-14 bg-[image:var(--select-button-svg)] bg-right bg-no-repeat appearance-none pr-10 placeholder:text-[#677583] p-[15px] text-base font-normal leading-normal">
+                            <option value="one">Last 30 Days</option>
+                            <option value="two">Last Quarter</option>
+                            <option value="three">Last 12 Months</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#121417] text-base font-medium leading-normal pb-2">Denial Reason</p>
+                        <select id="denial-reason-select" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#121417] focus:outline-0 focus:ring-0 border border-[#dde0e4] bg-white focus:border-[#dde0e4] h-14 bg-[image:var(--select-button-svg)] bg-right bg-no-repeat appearance-none pr-10 placeholder:text-[#677583] p-[15px] text-base font-normal leading-normal">
+                            <option value="one">All Reasons</option>
+                            <option value="two">Missing Information</option>
+                            <option value="three">Incorrect Coding</option>
+                            <option value="four">Prior Authorization Required</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#121417] text-base font-medium leading-normal pb-2">Insurance Provider</p>
+                        <select id="insurance-provider-select" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#121417] focus:outline-0 focus:ring-0 border border-[#dde0e4] bg-white focus:border-[#dde0e4] h-14 bg-[image:var(--select-button-svg)] bg-right bg-no-repeat appearance-none pr-10 placeholder:text-[#677583] p-[15px] text-base font-normal leading-normal">
+                            <option value="one">All Providers</option>
+                            <option value="two">Medicare</option>
+                            <option value="three">Blue Cross</option>
+                            <option value="four">United Healthcare</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+                    <label class="flex flex-col min-w-40 flex-1">
+                        <p class="text-[#121417] text-base font-medium leading-normal pb-2">Report Format</p>
+                        <select id="report-format-select" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#121417] focus:outline-0 focus:ring-0 border border-[#dde0e4] bg-white focus:border-[#dde0e4] h-14 bg-[image:var(--select-button-svg)] bg-right bg-no-repeat appearance-none pr-10 placeholder:text-[#677583] p-[15px] text-base font-normal leading-normal">
+                            <option value="one">PDF</option>
+                            <option value="two">CSV</option>
+                            <option value="three">Excel</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="flex px-4 py-3 justify-start">
+                    <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#d2e2f3] text-[#121417] text-sm font-bold leading-normal tracking-[0.015em]" onclick="handleGenerateReport()">
+                        <span class="truncate">Generate Report</span>
+                    </button>
+                </div>
+                <h2 class="text-[#121417] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Report Preview</h2>
+                <div class="px-4 py-3 @container">
+                    <div class="flex overflow-hidden rounded-xl border border-[#dde0e4] bg-white">
+                        <table class="flex-1">
+                            <thead>
+                                <tr class="bg-white">
+                                    <th class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-120 px-4 py-3 text-left text-[#121417] w-[400px] text-sm font-medium leading-normal">
+                                        Denial Reason
+                                    </th>
+                                    <th class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-240 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">
+                                        Number of Denials
+                                    </th>
+                                    <th class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-360 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">
+                                        Percentage
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">
+                                        Missing Information
+                                    </td>
+                                    <td class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">120</td>
+                                    <td class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-360 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">30%</td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">
+                                        Incorrect Coding
+                                    </td>
+                                    <td class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">80</td>
+                                    <td class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-360 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">20%</td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">
+                                        Prior Authorization Required
+                                    </td>
+                                    <td class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">60</td>
+                                    <td class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-360 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">15%</td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">
+                                        Non-Covered Service
+                                    </td>
+                                    <td class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">50</td>
+                                    <td class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-360 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">12.5%</td>
+                                </tr>
+                                <tr class="border-t border-t-[#dde0e4]">
+                                    <td class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-120 h-[72px] px-4 py-2 w-[400px] text-[#121417] text-sm font-normal leading-normal">Other</td>
+                                    <td class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-240 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">90</td>
+                                    <td class="table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-360 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">22.5%</td>
+                                </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <style>
+                            @container(max-width:120px){.table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-120{display: none;}}
+                            @container(max-width:240px){.table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-240{display: none;}}
+                            @container(max-width:360px){.table-763ecaad-fc0c-4d45-80cd-0e6f6293391d-column-360{display: none;}}
+                        </style>
+                    </div>
+                    <div class="flex px-4 py-3 justify-start">
+                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f1f2f4] text-[#121417] text-sm font-bold leading-normal tracking-[0.015em]" onclick="console.log('Export Report clicked')">
+                            <span class="truncate">Export Report</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+  };
+
+  return (
+    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style="font-family: Inter, &quot;Noto Sans&quot;, sans-serif;">
+      {/* Header component is always rendered */}
+      <Header navigateTo={navigateTo} />
+      <div class="layout-container flex h-full grow flex-col">
+        {/* Render the current page based on state */}
+        {(() => {
+          switch (currentPage) {
+            case PAGES.DASHBOARD:
+              return <DashboardPage />;
+            case PAGES.DENIALS_ANALYSIS:
+              return <DenialsAnalysisPage />;
+            case PAGES.NEW_CLAIM_PREDICTION:
+              // Pass navigateTo to allow NewClaimPredictionPage to redirect to results
+              return <NewClaimPredictionPage navigateTo={navigateTo} />;
+            case PAGES.CLAIM_PREDICTION_RESULTS:
+              return <ClaimPredictionResultsPage predictionResult={predictionResult} />;
+            case PAGES.DATASETS:
+              return <DatasetsPage />;
+            case PAGES.SETTINGS_SYSTEM_PARAMETERS:
+              return <SettingsSystemParametersPage navigateTo={navigateTo} />;
+            case PAGES.SETTINGS_PAYER_RULES:
+              return <SettingsPayerRulesPage navigateTo={navigateTo} />;
+            case PAGES.USER_MANAGEMENT:
+              return <UserManagementPage navigateTo={navigateTo} />;
+            case PAGES.REPORTS:
+              return <ReportsPage />;
+            default:
+              return <DashboardPage />;
+          }
+        })()}
+      </div>
+    </div>
+  );
+}
+
+export default App;
