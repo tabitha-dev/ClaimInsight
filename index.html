@@ -14,6 +14,9 @@
       onload="this.rel='stylesheet'"
       href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
     />
+    <!-- D3.js for charting -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
     <style>
         /* Custom styles for select button SVG, if needed, but Tailwind handles most */
         :root {
@@ -28,6 +31,12 @@
             -moz-appearance: none;
             appearance: none;
             padding-right: 2.5rem; /* Adjust padding to prevent text overlapping arrow */
+        }
+        /* Ensure SVGs are responsive within their containers */
+        svg {
+            width: 100%;
+            height: 100%; /* Take full height of parent div */
+            display: block;
         }
     </style>
 </head>
@@ -46,6 +55,7 @@
                 <h2 class="text-[#111418] text-lg font-bold leading-tight tracking-[-0.015em]">Claim Insights</h2>
             </div>
             <div class="flex flex-1 justify-end gap-4 sm:gap-8">
+                <!-- Desktop Navigation -->
                 <div class="hidden sm:flex items-center gap-4 sm:gap-9">
                     <a class="text-[#111418] text-sm font-medium leading-normal cursor-pointer" onclick="navigateTo('dashboard')">Dashboard</a>
                     <a class="text-[#111418] text-sm font-medium leading-normal cursor-pointer" onclick="navigateTo('denials_analysis')">Denials Analysis</a>
@@ -53,6 +63,12 @@
                     <a class="text-[#111418] text-sm font-medium leading-normal cursor-pointer" onclick="navigateTo('reports')">Reports</a>
                     <a class="text-[#111418] text-sm font-medium leading-normal cursor-pointer" onclick="navigateTo('settings_system_parameters')">Settings</a>
                 </div>
+                <!-- Mobile Hamburger Menu Button -->
+                <button id="mobile-menu-toggle" class="sm:hidden flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#f0f2f5] text-[#111418] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"></path>
+                    </svg>
+                </button>
                 <button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#f0f2f5] text-[#111418] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
                     <div class="text-[#111418]" data-icon="Bell" data-size="20px" data-weight="regular">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor" viewBox="0 0 256 256">
@@ -64,8 +80,31 @@
             </div>
         </header>
 
-        <!-- Page Content -->
-        <div class="px-4 sm:px-40 flex flex-1 justify-center py-5">
+        <!-- Mobile Navigation Drawer -->
+        <div id="mobile-menu-drawer" class="fixed inset-y-0 left-0 w-64 bg-white z-50 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-lg sm:hidden">
+            <div class="flex items-center justify-between p-4 border-b border-solid border-b-[#f0f2f5]">
+                <h2 class="text-[#111418] text-lg font-bold leading-tight tracking-[-0.015em]">Navigation</h2>
+                <button id="close-mobile-menu" class="text-[#111418]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31l-66.34,66.35a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66a8,8,0,0,1,11.32-11.32L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path>
+                    </svg>
+                </button>
+            </div>
+            <nav class="flex flex-col p-4 gap-2">
+                <a class="text-[#111418] text-base font-medium leading-normal px-3 py-2 rounded-lg hover:bg-[#f0f2f5] cursor-pointer" onclick="navigateTo('dashboard')">Dashboard</a>
+                <a class="text-[#111418] text-base font-medium leading-normal px-3 py-2 rounded-lg hover:bg-[#f0f2f5] cursor-pointer" onclick="navigateTo('denials_analysis')">Denials Analysis</a>
+                <a class="text-[#111418] text-base font-medium leading-normal px-3 py-2 rounded-lg hover:bg-[#f0f2f5] cursor-pointer" onclick="navigateTo('new_claim_prediction')">Predictions</a>
+                <a class="text-[#111418] text-base font-medium leading-normal px-3 py-2 rounded-lg hover:bg-[#f0f2f5] cursor-pointer" onclick="navigateTo('reports')">Reports</a>
+                <a class="text-[#111418] text-base font-medium leading-normal px-3 py-2 rounded-lg hover:bg-[#f0f2f5] cursor-pointer" onclick="navigateTo('settings_system_parameters')">Settings</a>
+            </nav>
+        </div>
+        <!-- Mobile Menu Overlay -->
+        <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden" onclick="closeMobileMenu()"></div>
+
+
+        <!-- Page Content Wrapper -->
+        <div id="page-content-container" class="px-4 sm:px-40 flex flex-1 justify-center py-5">
+            <!-- All pages are now children of this container -->
             <div id="dashboard-page" class="layout-content-container flex flex-col max-w-[960px] flex-1">
                 <div class="flex flex-wrap justify-between gap-3 p-4">
                     <div class="flex min-w-72 flex-col gap-3">
@@ -105,7 +144,7 @@
                             <p class="text-[#e73908] text-base font-medium leading-normal">-1.5%</p>
                         </div>
                         <div class="w-full h-[180px] py-4">
-                            <svg id="denial-rate-chart" width="100%" height="100%" viewBox="0 0 478 150" preserveAspectRatio="none"></svg>
+                            <svg id="denial-rate-chart" width="100%" height="100%" viewBox="0 0 478 150" preserveAspectRatio="xMidYMid meet"></svg>
                         </div>
                     </div>
                     <div class="flex min-w-72 flex-1 flex-col gap-2 rounded-lg border border-[#dbe0e6] p-6">
@@ -116,7 +155,7 @@
                             <p class="text-[#078838] text-base font-medium leading-normal">+10%</p>
                         </div>
                         <div class="w-full h-[180px] py-4">
-                            <svg id="denials-by-reason-chart" width="100%" height="100%" viewBox="0 0 478 150" preserveAspectRatio="none"></svg>
+                            <svg id="denials-by-reason-chart" width="100%" height="100%" viewBox="0 0 478 150" preserveAspectRatio="xMidYMid meet"></svg>
                         </div>
                     </div>
                 </div>
@@ -129,7 +168,7 @@
                             <p class="text-[#60758a] text-base font-normal leading-normal">Total Outstanding</p>
                         </div>
                         <div class="w-full h-[180px] py-4">
-                            <svg id="aged-ar-chart" width="100%" height="100%" viewBox="0 0 478 150" preserveAspectRatio="none"></svg>
+                            <svg id="aged-ar-chart" width="100%" height="100%" viewBox="0 0 478 150" preserveAspectRatio="xMidYMid meet"></svg>
                         </div>
                     </div>
                 </div>
@@ -152,7 +191,7 @@
                             <p class="text-[#e73908] text-base font-medium leading-normal">-2%</p>
                         </div>
                         <div class="w-full h-[180px] py-4">
-                            <svg id="denials-analysis-chart" width="100%" height="100%" viewBox="0 0 478 150" preserveAspectRatio="none"></svg>
+                            <svg id="denials-analysis-chart" width="100%" height="100%" viewBox="0 0 478 150" preserveAspectRatio="xMidYMid meet"></svg>
                         </div>
                     </div>
                 </div>
@@ -270,7 +309,7 @@
                 </div>
             </div>
 
-            <div id="new-claim-prediction-page" class="layout-content-container flex flex-col w-full sm:w-[512px] max-w-[960px] flex-1 py-5 hidden">
+            <div id="new-claim-prediction-page" class="layout-content-container flex flex-col w-full sm:w-[512px] max-w-[960px] flex-1 hidden">
                 <div class="flex flex-wrap justify-between gap-3 p-4">
                     <p class="text-[#111418] tracking-light text-[32px] font-bold leading-tight min-w-72">New Claim Prediction</p>
                 </div>
@@ -639,7 +678,7 @@
                                     <th class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-480 px-4 py-3 text-left text-[#121417] w-[400px] text-sm font-medium leading-normal">
                                         Rule Description
                                     </th>
-                                    <th class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-600 h-[72px] px-4 py-2 w-60 text-sm font-medium leading-normal">Status</th>
+                                    <th class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-600 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">Status</th>
                                     <th class="table-783b51e4-d627-4da2-9a34-bef2556d717a-column-720 h-[72px] px-4 py-2 w-[400px] text-[#677583] text-sm font-normal leading-normal">
                                         Last Updated
                                     </th>
@@ -880,7 +919,7 @@
                         <a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#60758a] pb-[13px] pt-4 cursor-pointer" onclick="navigateTo('settings_payer_rules')">
                             <p class="text-[#60758a] text-sm font-bold leading-normal tracking-[0.015em]">Payer Rules</p>
                         </a>
-                        <a class="flex flex-col items-center justify-center border-b-[3px] border-b-[#111418] text-[#111418] pb-[13px] pt-4 cursor-pointer" onclick="navigateTo('user_management')">
+                        <a class="flex flex-col items-center justify-center border-b-[3px] border-b-[#111418] text-[#111417] pb-[13px] pt-4 cursor-pointer" onclick="navigateTo('user_management')">
                             <p class="text-[#111418] text-sm font-bold leading-normal tracking-[0.015em]">Account</p>
                         </a>
                     </div>
@@ -1124,43 +1163,711 @@
                 </div>
             </div>
         </div>
-    );
-  };
-
-  return (
-    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style="font-family: Inter, &quot;Noto Sans&quot;, sans-serif;">
-      {/* Header component is always rendered */}
-      <Header navigateTo={navigateTo} />
-      <div class="layout-container flex h-full grow flex-col">
-        {/* Render the current page based on state */}
-        {(() => {
-          switch (currentPage) {
-            case PAGES.DASHBOARD:
-              return <DashboardPage />;
-            case PAGES.DENIALS_ANALYSIS:
-              return <DenialsAnalysisPage />;
-            case PAGES.NEW_CLAIM_PREDICTION:
-              // Pass navigateTo to allow NewClaimPredictionPage to redirect to results
-              return <NewClaimPredictionPage navigateTo={navigateTo} />;
-            case PAGES.CLAIM_PREDICTION_RESULTS:
-              return <ClaimPredictionResultsPage predictionResult={predictionResult} />;
-            case PAGES.DATASETS:
-              return <DatasetsPage />;
-            case PAGES.SETTINGS_SYSTEM_PARAMETERS:
-              return <SettingsSystemParametersPage navigateTo={navigateTo} />;
-            case PAGES.SETTINGS_PAYER_RULES:
-              return <SettingsPayerRulesPage navigateTo={navigateTo} />;
-            case PAGES.USER_MANAGEMENT:
-              return <UserManagementPage navigateTo={navigateTo} />;
-            case PAGES.REPORTS:
-              return <ReportsPage />;
-            default:
-              return <DashboardPage />;
-          }
-        })()}
-      </div>
     </div>
-  );
-}
 
-export default App;
+    <script>
+        // --- Global State and Navigation ---
+        let currentPage = 'dashboard';
+        let predictionResult = null; // To store prediction results across pages
+
+        const PAGES = {
+            DASHBOARD: 'dashboard',
+            DENIALS_ANALYSIS: 'denials_analysis',
+            NEW_CLAIM_PREDICTION: 'new_claim_prediction',
+            CLAIM_PREDICTION_RESULTS: 'claim_prediction_results',
+            DATASETS: 'datasets',
+            SETTINGS_SYSTEM_PARAMETERS: 'settings_system_parameters',
+            SETTINGS_PAYER_RULES: 'settings_payer_rules',
+            USER_MANAGEMENT: 'user_management',
+            REPORTS: 'reports',
+        };
+
+        function navigateTo(page, data = null) {
+            currentPage = page;
+            if (page === PAGES.CLAIM_PREDICTION_RESULTS) {
+                predictionResult = data;
+            }
+            renderPage();
+            closeMobileMenu(); // Close mobile menu on navigation
+        }
+
+        // --- Mobile Menu Functions ---
+        function openMobileMenu() {
+            const drawer = document.getElementById('mobile-menu-drawer');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            if (drawer) {
+                drawer.classList.remove('-translate-x-full');
+                drawer.classList.add('translate-x-0');
+            }
+            if (overlay) {
+                overlay.classList.remove('hidden');
+            }
+        }
+
+        function closeMobileMenu() {
+            const drawer = document.getElementById('mobile-menu-drawer');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            if (drawer) {
+                drawer.classList.remove('translate-x-0');
+                drawer.classList.add('-translate-x-full');
+            }
+            if (overlay) {
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // --- Mock Data for Charts (D3.js compatible) ---
+        const monthlyDenialData = [
+            { name: 'Jan', value: 8.5 },
+            { name: 'Feb', value: 8.0 },
+            { name: 'Mar', value: 7.8 },
+            { name: 'Apr', value: 7.5 },
+            { name: 'May', value: 7.2 },
+            { name: 'Jun', value: 7.0 },
+            { name: 'Jul', value: 6.8 },
+            { name: 'Aug', value: 6.5 },
+            { name: 'Sep', value: 6.3 },
+            { name: 'Oct', value: 6.0 },
+            { name: 'Nov', value: 5.8 },
+            { name: 'Dec', value: 5.5 },
+        ];
+
+        const denialReasonData = [
+            { name: 'Missing Info', value: 250 },
+            { name: 'Non-Covered', value: 200 },
+            { name: 'Auth Req', value: 150 },
+            { name: 'Incorrect Coding', value: 100 },
+            { name: 'Duplicate', value: 50 },
+            { name: 'Other', value: 90 },
+        ];
+
+        const agedAccountsReceivableData = [
+            { name: '0-30 Days', value: 350000 },
+            { name: '31-60 Days', value: 150000 },
+            { name: '61-90 Days', value: 80000 },
+            { name: '90+ Days', value: 45000 },
+        ];
+
+        // Mock Payer Rules for dynamic display
+        const mockPayerRules = {
+            'Medicare': {
+                'J20.9 (Acute Bronchitis)': 'Medicare often requires detailed documentation for acute conditions to ensure medical necessity. Claims over $1000 for this code may be flagged.',
+                'I10 (Essential Hypertension)': 'For chronic conditions like hypertension, ensure regular follow-up notes are included. High claim amounts without clear justification may lead to denial.',
+                'default': 'Always verify patient eligibility and benefits prior to service for Medicare claims.',
+            },
+            'Blue Cross': {
+                'J20.9 (Acute Bronchitis)': 'Blue Cross may have specific preferred providers or require referrals for certain acute care services.',
+                'I10 (Essential Hypertension)': 'Prior authorization might be required for certain procedures related to hypertension management, especially for new treatments.',
+                'default': 'Check for any specific Blue Cross plan exclusions or limitations for the service type.',
+            },
+            'United Healthcare': {
+                'J20.9 (Acute Bronchitis)': 'United Healthcare often has strict timely filing limits. Ensure claims are submitted promptly.',
+                'I10 (Essential Hypertension)': 'For chronic disease management, United Healthcare emphasizes coordinated care. Missing referral information can lead to denials.',
+                'default': 'Review United Healthcare\'s specific coding guidelines for the procedure performed.',
+            },
+            'default': 'Always check the payer\'s specific guidelines and documentation requirements for the selected diagnosis and service.',
+        };
+
+        // --- Chart Rendering Functions (using D3.js) ---
+        function renderLineChart(svgId, data, yAxisLabel, lineColor) {
+            const svgElement = document.getElementById(svgId);
+            if (!svgElement) {
+                console.error(`SVG element with ID ${svgId} not found.`);
+                return;
+            }
+            const svg = d3.select(svgElement);
+            // Get the actual width and height of the SVG element from its computed style
+            const containerWidth = svgElement.clientWidth;
+            const containerHeight = svgElement.clientHeight;
+
+            // Ensure we have valid dimensions
+            if (containerWidth <= 0 || containerHeight <= 0) {
+                // console.warn(`SVG container dimensions are invalid for ${svgId}: width=${containerWidth}, height=${containerHeight}. Retrying in 100ms.`);
+                setTimeout(() => renderLineChart(svgId, data, yAxisLabel, lineColor), 100); // Retry rendering
+                return;
+            }
+
+            const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+            const width = containerWidth - margin.left - margin.right;
+            const height = containerHeight - margin.top - margin.bottom;
+
+            svg.selectAll("*").remove(); // Clear previous chart
+
+            const g = svg.append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleBand()
+                .domain(data.map(d => d.name))
+                .range([0, width])
+                .padding(0.1);
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.value) + 2]) // Add some padding to top
+                .range([height, 0]);
+
+            const line = d3.line()
+                .x(d => x(d.name) + x.bandwidth() / 2)
+                .y(d => y(d.value));
+
+            g.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+            g.append("g")
+                .call(d3.axisLeft(y));
+
+            g.append("path")
+                .datum(data)
+                .attr("fill", "none")
+                .attr("stroke", lineColor)
+                .attr("stroke-width", 3)
+                .attr("d", line);
+
+            // Add circles for data points
+            g.selectAll(".dot")
+                .data(data)
+                .enter().append("circle")
+                .attr("class", "dot")
+                .attr("cx", d => x(d.name) + x.bandwidth() / 2)
+                .attr("cy", d => y(d.value))
+                .attr("r", 5)
+                .attr("fill", lineColor);
+
+            // Tooltip functionality (simple text overlay)
+            const tooltip = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("position", "absolute")
+                .style("background-color", "white")
+                .style("border", "1px solid #ccc")
+                .style("padding", "8px")
+                .style("border-radius", "4px")
+                .style("pointer-events", "none")
+                .style("opacity", 0);
+
+            g.selectAll(".dot")
+                .on("mouseover", function(event, d) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html(`${d.name}: ${d.value}${yAxisLabel === 'Denial Rate' ? '%' : ''}`)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", function(d) {
+                    tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });
+        }
+
+        function renderBarChart(svgId, data, yAxisLabel, barColor) {
+            const svgElement = document.getElementById(svgId);
+            if (!svgElement) {
+                console.error(`SVG element with ID ${svgId} not found.`);
+                return;
+            }
+            const svg = d3.select(svgElement);
+            // Get the actual width and height of the SVG element from its computed style
+            const containerWidth = svgElement.clientWidth;
+            const containerHeight = svgElement.clientHeight;
+
+            // Ensure we have valid dimensions
+            if (containerWidth <= 0 || containerHeight <= 0) {
+                // console.warn(`SVG container dimensions are invalid for ${svgId}: width=${containerWidth}, height=${containerHeight}. Retrying in 100ms.`);
+                setTimeout(() => renderBarChart(svgId, data, yAxisLabel, barColor), 100); // Retry rendering
+                return;
+            }
+
+            const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+            const width = containerWidth - margin.left - margin.right;
+            const height = containerHeight - margin.top - margin.bottom;
+
+            svg.selectAll("*").remove(); // Clear previous chart
+
+            const g = svg.append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleBand()
+                .domain(data.map(d => d.name))
+                .range([0, width])
+                .padding(0.1);
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.value) + 50]) // Add some padding to top
+                .range([height, 0]);
+
+            g.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+            g.append("g")
+                .call(d3.axisLeft(y).tickFormat(d => (yAxisLabel === 'Amount' ? '$' : '') + d.toLocaleString()));
+
+            g.selectAll(".bar")
+                .data(data)
+                .enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", d => x(d.name))
+                .attr("y", d => y(d.value))
+                .attr("width", x.bandwidth())
+                .attr("height", d => height - y(d.value))
+                .attr("fill", barColor);
+
+            // Tooltip functionality (simple text overlay)
+            const tooltip = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("position", "absolute")
+                .style("background-color", "white")
+                .style("border", "1px solid #ccc")
+                .style("padding", "8px")
+                .style("border-radius", "4px")
+                .style("pointer-events", "none")
+                .style("opacity", 0);
+
+            g.selectAll(".bar")
+                .on("mouseover", function(event, d) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html(`${d.name}: ${yAxisLabel === 'Amount' ? '$' : ''}${d.value.toLocaleString()}`)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", function(d) {
+                    tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });
+        }
+
+        // --- Page Rendering Logic ---
+        function renderPage() {
+            // Get all page elements by their IDs
+            const dashboardPage = document.getElementById('dashboard-page');
+            const denialsAnalysisPage = document.getElementById('denials-analysis-page');
+            const newClaimPredictionPage = document.getElementById('new-claim-prediction-page');
+            const claimPredictionResultsPage = document.getElementById('claim-prediction-results-page');
+            const datasetsPage = document.getElementById('datasets-page');
+            const settingsSystemParametersPage = document.getElementById('settings-system-parameters-page');
+            const settingsPayerRulesPage = document.getElementById('settings-payer-rules-page');
+            const userManagementPage = document.getElementById('user-management-page');
+            const reportsPage = document.getElementById('reports-page');
+
+            const allPages = [
+                dashboardPage, denialsAnalysisPage, newClaimPredictionPage,
+                claimPredictionResultsPage, datasetsPage, settingsSystemParametersPage,
+                settingsPayerRulesPage, userManagementPage, reportsPage
+            ];
+
+            // Hide all pages first
+            allPages.forEach(page => {
+                if (page) {
+                    page.classList.add('hidden');
+                } else {
+                    // This error should ideally not happen now with correct HTML structure
+                    console.error(`Page element not found during hiding: ${page ? page.id : 'null'}`);
+                }
+            });
+
+            let activePageElement = null;
+            switch (currentPage) {
+                case PAGES.DASHBOARD:
+                    activePageElement = dashboardPage;
+                    break;
+                case PAGES.DENIALS_ANALYSIS:
+                    activePageElement = denialsAnalysisPage;
+                    break;
+                case PAGES.NEW_CLAIM_PREDICTION:
+                    activePageElement = newClaimPredictionPage;
+                    break;
+                case PAGES.CLAIM_PREDICTION_RESULTS:
+                    activePageElement = claimPredictionResultsPage;
+                    break;
+                case PAGES.DATASETS:
+                    activePageElement = datasetsPage;
+                    break;
+                case PAGES.SETTINGS_SYSTEM_PARAMETERS:
+                    activePageElement = settingsSystemParametersPage;
+                    break;
+                case PAGES.SETTINGS_PAYER_RULES:
+                    activePageElement = settingsPayerRulesPage;
+                    break;
+                case PAGES.USER_MANAGEMENT:
+                    activePageElement = userManagementPage;
+                    break;
+                case PAGES.REPORTS:
+                    activePageElement = reportsPage;
+                    break;
+            }
+
+            if (activePageElement) {
+                activePageElement.classList.remove('hidden');
+                // Re-attach listeners and render charts for the active page
+                if (currentPage === PAGES.DASHBOARD) {
+                    renderLineChart('denial-rate-chart', monthlyDenialData, 'Denial Rate', '#60758a');
+                    renderBarChart('denials-by-reason-chart', denialReasonData, 'Denials', '#60758a');
+                    renderBarChart('aged-ar-chart', agedAccountsReceivableData, 'Amount', '#3d98f4');
+                } else if (currentPage === PAGES.DENIALS_ANALYSIS) {
+                    renderLineChart('denials-analysis-chart', monthlyDenialData, 'Denial Rate', '#60758a');
+                } else if (currentPage === PAGES.NEW_CLAIM_PREDICTION) {
+                    attachNewClaimPredictionListeners();
+                } else if (currentPage === PAGES.CLAIM_PREDICTION_RESULTS) {
+                    displayPredictionResults();
+                } else if (currentPage === PAGES.DATASETS) {
+                    // No specific JS for datasets page beyond initial HTML
+                } else if (currentPage === PAGES.SETTINGS_SYSTEM_PARAMETERS) {
+                    attachSettingsSystemParametersListeners();
+                } else if (currentPage === PAGES.SETTINGS_PAYER_RULES) {
+                    attachSettingsPayerRulesListeners();
+                } else if (currentPage === PAGES.USER_MANAGEMENT) {
+                    // No specific JS for user management page beyond initial HTML
+                } else if (currentPage === PAGES.REPORTS) {
+                    attachReportsPageListeners();
+                }
+            } else {
+                console.error(`Attempted to navigate to unknown page: ${currentPage}`);
+            }
+        }
+
+        // --- New Claim Prediction Page Logic ---
+        function attachNewClaimPredictionListeners() {
+            const claimIdInput = document.getElementById('claim-id-input');
+            const patientIdInput = document.getElementById('patient-id-input');
+            const providerIdInput = document.getElementById('provider-id-input');
+            const serviceTypeSelect = document.getElementById('service-type-select');
+            const diagnosisCodeSelect = document.getElementById('diagnosis-code-select');
+            const claimAmountInput = document.getElementById('claim-amount-input');
+            const insurancePlanSelect = document.getElementById('insurance-plan-select');
+            const predictDenialRiskBtn = document.getElementById('predict-denial-risk-btn');
+            const simulateScrubbingBtn = document.getElementById('simulate-scrubbing-btn');
+            const scrubbingWarningsDiv = document.getElementById('scrubbing-warnings');
+            const scrubbingWarningsList = scrubbingWarningsDiv ? scrubbingWarningsDiv.querySelector('ul') : null; // Added null check
+            const estimateResponsibilityBtn = document.getElementById('estimate-responsibility-btn');
+            const patientResponsibilityDisplay = document.getElementById('patient-responsibility-display');
+            const payerRuleMessageDiv = document.getElementById('payer-rule-message');
+
+            // Clear previous values and warnings
+            if (claimIdInput) claimIdInput.value = '';
+            if (patientIdInput) patientIdInput.value = '';
+            if (providerIdInput) providerIdInput.value = '';
+            if (serviceTypeSelect) serviceTypeSelect.value = 'one';
+            if (diagnosisCodeSelect) diagnosisCodeSelect.value = 'one';
+            if (claimAmountInput) claimAmountInput.value = '';
+            if (insurancePlanSelect) insurancePlanSelect.value = 'one';
+            if (scrubbingWarningsDiv) scrubbingWarningsDiv.classList.add('hidden');
+            if (scrubbingWarningsList) scrubbingWarningsList.innerHTML = '';
+            if (patientResponsibilityDisplay) {
+                patientResponsibilityDisplay.classList.add('hidden');
+                patientResponsibilityDisplay.querySelector('span').textContent = '';
+            }
+            if (payerRuleMessageDiv) payerRuleMessageDiv.classList.add('hidden');
+            if (payerRuleMessageDiv) payerRuleMessageDiv.textContent = '';
+
+
+            const updatePayerRuleMessage = () => {
+                const selectedPayer = insurancePlanSelect ? insurancePlanSelect.value : 'one';
+                const selectedDiagnosis = diagnosisCodeSelect ? diagnosisCodeSelect.value : 'one';
+                let message = '';
+
+                if (selectedPayer !== 'one' && selectedDiagnosis !== 'one' && payerRuleMessageDiv) {
+                    const payerRules = mockPayerRules[selectedPayer] || mockPayerRules['default'];
+                    message = payerRules[selectedDiagnosis] || payerRules['default'];
+                    payerRuleMessageDiv.textContent = `**Payer Rule Hint:** ${message}`;
+                    payerRuleMessageDiv.classList.remove('hidden');
+                } else if (payerRuleMessageDiv) {
+                    payerRuleMessageDiv.classList.add('hidden');
+                }
+            };
+
+            if (insurancePlanSelect) insurancePlanSelect.onchange = updatePayerRuleMessage;
+            if (diagnosisCodeSelect) diagnosisCodeSelect.onchange = updatePayerRuleMessage;
+
+
+            if (predictDenialRiskBtn) predictDenialRiskBtn.onclick = () => {
+                const claimDetails = {
+                    claimId: claimIdInput ? claimIdInput.value : '',
+                    patientId: patientIdInput ? patientIdInput.value : '',
+                    providerId: providerIdInput ? providerIdInput.value : '',
+                    serviceType: serviceTypeSelect ? serviceTypeSelect.value : '',
+                    diagnosisCode: diagnosisCodeSelect ? diagnosisCodeSelect.value : '',
+                    claimAmount: claimAmountInput ? claimAmountInput.value : '',
+                    insurancePlan: insurancePlanSelect ? insurancePlanSelect.value : '',
+                    patientName: 'Sophia Clark', // Mock data
+                    serviceDate: '2023-10-26', // Mock data
+                    procedureCode: '99203', // Mock data
+                    status: 'Pending', // Mock data
+                };
+
+                const amount = parseFloat(claimDetails.claimAmount);
+                const diagCode = claimDetails.diagnosisCode;
+
+                let risk = 'Low';
+                let explanation = 'This claim has a low risk of denial based on historical data.';
+                let recommendations = [
+                    'Ensure all documentation is accurate and complete.',
+                    'Submit the claim promptly.',
+                ];
+
+                if (amount > 1000 && diagCode === 'J20.9 (Acute Bronchitis)') {
+                    risk = 'Medium';
+                    explanation = 'The claim amount is somewhat high for this diagnosis, which could raise flags.';
+                    recommendations = [
+                        'Verify the diagnosis code and procedure code for accuracy.',
+                        'Review the claim amount and ensure it aligns with standard pricing.',
+                        'Consider adding additional supporting documentation if available.',
+                    ];
+                }
+                if (amount > 2000 && diagCode === 'I10 (Essential Hypertension)') {
+                    risk = 'High';
+                    explanation = 'This claim has a high risk of denial due to a combination of high claim amount and a diagnosis code that frequently leads to denials for this service type.';
+                    recommendations = [
+                        'Verify the diagnosis code and procedure code for accuracy.',
+                        'Review the claim amount and ensure it aligns with standard pricing.',
+                        'Consider contacting the provider to clarify any discrepancies.',
+                        'Prepare for potential appeals or requests for additional information.',
+                    ];
+                }
+                if (amount > 5000) {
+                    risk = 'High';
+                    explanation = 'The claim amount is significantly higher than average, which is a common flag for denials.';
+                    recommendations = [
+                        'Thoroughly review all aspects of the claim for accuracy.',
+                        'Gather all supporting medical records and documentation.',
+                        'Consider pre-authorization if not already obtained.',
+                    ];
+                }
+
+                predictionResult = {
+                    claimDetails: claimDetails,
+                    prediction: {
+                        risk,
+                        explanation,
+                        recommendations,
+                    },
+                };
+                navigateTo(PAGES.CLAIM_PREDICTION_RESULTS);
+            };
+
+            if (simulateScrubbingBtn) simulateScrubbingBtn.onclick = () => {
+                const warnings = [];
+                if (claimIdInput && !claimIdInput.value) warnings.push('Claim ID is missing.');
+                if (patientIdInput && !patientIdInput.value) warnings.push('Patient ID is missing.');
+                const amount = claimAmountInput ? parseFloat(claimAmountInput.value) : 0;
+                if (isNaN(amount) || amount <= 0) warnings.push('Claim Amount is invalid.');
+                if (serviceTypeSelect && serviceTypeSelect.value === 'one') warnings.push('Service Type not selected.');
+                if (diagnosisCodeSelect && diagnosisCodeSelect.value === 'one') warnings.push('Diagnosis Code not selected.');
+                if (insurancePlanSelect && insurancePlanSelect.value === 'one') warnings.push('Insurance Plan not selected.');
+
+                if (amount > 2000 && (diagnosisCodeSelect && diagnosisCodeSelect.value === 'J20.9 (Acute Bronchitis)')) {
+                    warnings.push('High claim amount for Acute Bronchitis. May require additional justification.');
+                }
+                if ((providerIdInput && providerIdInput.value === 'PROV123') && amount > 1500) {
+                    warnings.push('Provider PROV123 has a history of high claim denials for amounts over $1500.');
+                }
+
+                if (scrubbingWarningsList) scrubbingWarningsList.innerHTML = ''; // Clear previous warnings
+                if (scrubbingWarningsDiv) {
+                    if (warnings.length > 0) {
+                        warnings.forEach(warning => {
+                            const li = document.createElement('li');
+                            li.textContent = warning;
+                            if (scrubbingWarningsList) scrubbingWarningsList.appendChild(li);
+                        });
+                        scrubbingWarningsDiv.classList.remove('hidden');
+                        scrubbingWarningsDiv.classList.remove('bg-green-100', 'border-green-400', 'text-green-700');
+                        scrubbingWarningsDiv.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
+                    } else {
+                        const li = document.createElement('li');
+                        li.textContent = 'No significant issues found during scrubbing simulation.';
+                        if (scrubbingWarningsList) scrubbingWarningsList.appendChild(li);
+                        scrubbingWarningsDiv.classList.remove('hidden');
+                        scrubbingWarningsDiv.classList.remove('bg-red-100', 'border-red-400', 'text-red-700');
+                        scrubbingWarningsDiv.classList.add('bg-green-100', 'border-green-400', 'text-green-700');
+                    }
+                }
+            };
+
+            if (estimateResponsibilityBtn) estimateResponsibilityBtn.onclick = () => {
+                const amount = claimAmountInput ? parseFloat(claimAmountInput.value) : 0;
+                if (isNaN(amount) || amount <= 0) {
+                    if (patientResponsibilityDisplay) {
+                        patientResponsibilityDisplay.querySelector('span').textContent = 'N/A (Invalid amount)';
+                        patientResponsibilityDisplay.classList.remove('hidden');
+                    }
+                    return;
+                }
+
+                let estimatedResponsibility = 0;
+                if (insurancePlanSelect && insurancePlanSelect.value === 'Medicare') {
+                    estimatedResponsibility = amount * 0.20;
+                } else if (insurancePlanSelect && insurancePlanSelect.value === 'Blue Cross') {
+                    estimatedResponsibility = Math.min(amount * 0.10, 500);
+                } else if (insurancePlanSelect && insurancePlanSelect.value === 'United Healthcare') {
+                    estimatedResponsibility = 250;
+                } else {
+                    estimatedResponsibility = amount;
+                }
+                if (patientResponsibilityDisplay) {
+                    patientResponsibilityDisplay.querySelector('span').textContent = `$${estimatedResponsibility.toFixed(2)}`;
+                    patientResponsibilityDisplay.classList.remove('hidden');
+                }
+            };
+        }
+
+        // --- Claim Prediction Results Page Logic ---
+        function displayPredictionResults() {
+            const claimPredictionResultsPage = document.getElementById('claim-prediction-results-page');
+            if (!claimPredictionResultsPage) {
+                console.error("Claim Prediction Results Page element not found.");
+                return;
+            }
+
+            if (!predictionResult) {
+                // This block should ideally not be reached if navigation is handled correctly
+                // but as a fallback, show a message
+                claimPredictionResultsPage.innerHTML = `
+                    <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
+                        <p class="text-[#111418] text-lg font-bold leading-tight tracking-[-0.015em] p-4">No prediction data available. Please submit a new claim prediction.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const { claimDetails, prediction } = predictionResult;
+
+            document.getElementById('result-claim-id').textContent = claimDetails.claimId;
+            document.getElementById('result-patient-id').textContent = claimDetails.patientId;
+            document.getElementById('result-provider-id').textContent = claimDetails.providerId;
+            document.getElementById('result-service-type').textContent = claimDetails.serviceType;
+            document.getElementById('result-claim-amount').textContent = `$${parseFloat(claimDetails.claimAmount).toLocaleString()}`;
+            document.getElementById('result-diagnosis-code').textContent = claimDetails.diagnosisCode;
+            document.getElementById('result-insurance-plan').textContent = claimDetails.insurancePlan;
+            document.getElementById('result-status').textContent = claimDetails.status;
+
+            const denialRiskElement = document.getElementById('result-denial-risk');
+            denialRiskElement.textContent = prediction.risk;
+            denialRiskElement.classList.remove('text-[#e73908]', 'text-[#f4b400]', 'text-[#078838]', 'text-[#111418]');
+            switch (prediction.risk) {
+                case 'High':
+                    denialRiskElement.classList.add('text-[#e73908]');
+                    break;
+                case 'Medium':
+                    denialRiskElement.classList.add('text-[#f4b400]');
+                    break;
+                case 'Low':
+                    denialRiskElement.classList.add('text-[#078838]');
+                    break;
+                default:
+                    denialRiskElement.classList.add('text-[#111418]');
+                    break;
+            }
+
+            document.getElementById('result-explanation').textContent = prediction.explanation;
+
+            const recommendationsDiv = document.getElementById('result-recommendations');
+            recommendationsDiv.innerHTML = '';
+            prediction.recommendations.forEach(rec => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-4 bg-white px-4 min-h-14';
+                div.innerHTML = `
+                    <div class="text-[#111418] flex items-center justify-center rounded-lg bg-[#f0f2f5] shrink-0 size-10" data-icon="Check" data-size="24px" data-weight="regular">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                            <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path>
+                        </svg>
+                    </div>
+                    <p class="text-[#111418] text-base font-normal leading-normal flex-1 truncate">${rec}</p>
+                `;
+                recommendationsDiv.appendChild(div);
+            });
+        }
+
+        // --- Settings Page Logic ---
+        function attachSettingsSystemParametersListeners() {
+            const denialThresholdInput = document.getElementById('denial-threshold-input');
+            const predictionModelVersionInput = document.getElementById('prediction-model-version-input');
+            const dataSourceInput = document.getElementById('data-source-input');
+
+            if (denialThresholdInput) denialThresholdInput.value = '8.0%';
+            if (predictionModelVersionInput) predictionModelVersionInput.value = 'v2.1';
+            if (dataSourceInput) dataSourceInput.value = 'ClaimsDB_2023';
+
+            window.handleUpdateParameters = () => {
+                const denialThreshold = denialThresholdInput ? denialThresholdInput.value : '';
+                const predictionModelVersion = predictionModelVersionInput ? predictionModelVersionInput.value : '';
+                const dataSource = dataSourceInput ? dataSourceInput.value : '';
+                console.log('Updating System Parameters:', { denialThreshold, predictionModelVersion, dataSource });
+                // In a real app, this would send data to a backend
+            };
+        }
+
+        function attachSettingsPayerRulesListeners() {
+            window.handleApplyFilters = () => {
+                const payerFilter = document.getElementById('payer-filter-select').value;
+                const serviceFilter = document.getElementById('service-filter-select').value;
+                const denialReasonFilter = document.getElementById('denial-reason-filter-select').value;
+                const statusFilter = document.getElementById('status-filter-select').value;
+                console.log('Applying Payer Rules Filters:', { payerFilter, serviceFilter, denialReasonFilter, statusFilter });
+            };
+        }
+
+        function attachReportsPageListeners() {
+            window.handleGenerateReport = () => {
+                const reportType = document.getElementById('report-type-select').value;
+                const dateRange = document.getElementById('date-range-select').value;
+                const denialReason = document.getElementById('denial-reason-select').value;
+                const insuranceProvider = document.getElementById('insurance-provider-select').value;
+                const reportFormat = document.getElementById('report-format-select').value;
+                console.log('Generating Report:', { reportType, dateRange, denialReason, insuranceProvider, reportFormat });
+            };
+        }
+
+
+        // Initial page render on load
+        window.onload = () => {
+            renderPage(); // Call renderPage initially
+
+            // Attach event listeners for header navigation links
+            document.querySelectorAll('header a[onclick^="navigateTo"]').forEach(link => {
+                const pageName = link.getAttribute('onclick').match(/'([^']+)'/)[1];
+                link.onclick = (event) => {
+                    event.preventDefault(); // Prevent default link behavior
+                    navigateTo(pageName);
+                };
+            });
+
+            // Attach event listeners for mobile menu toggle
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            if (mobileMenuToggle) {
+                mobileMenuToggle.onclick = openMobileMenu;
+            }
+
+            const closeMobileMenuBtn = document.getElementById('close-mobile-menu');
+            if (closeMobileMenuBtn) {
+                closeMobileMenuBtn.onclick = closeMobileMenu;
+            }
+
+            // Attach event listeners for mobile menu navigation links
+            document.querySelectorAll('#mobile-menu-drawer a[onclick^="navigateTo"]').forEach(link => {
+                const pageName = link.getAttribute('onclick').match(/'([^']+)'/)[1];
+                link.onclick = (event) => {
+                    event.preventDefault(); // Prevent default link behavior
+                    navigateTo(pageName);
+                };
+            });
+        };
+
+        // Add a resize event listener to re-render charts when the window is resized
+        window.addEventListener('resize', () => {
+            // Only re-render charts if we are on a page that displays charts
+            if (currentPage === PAGES.DASHBOARD) {
+                renderLineChart('denial-rate-chart', monthlyDenialData, 'Denial Rate', '#60758a');
+                renderBarChart('denials-by-reason-chart', denialReasonData, 'Denials', '#60758a');
+                renderBarChart('aged-ar-chart', agedAccountsReceivableData, 'Amount', '#3d98f4');
+            } else if (currentPage === PAGES.DENIALS_ANALYSIS) {
+                renderLineChart('denials-analysis-chart', monthlyDenialData, 'Denial Rate', '#60758a');
+            }
+        });
+
+    </script>
+</body>
+</html>
