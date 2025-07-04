@@ -1,1 +1,1 @@
-# CleanClaim
+# ClaimInsight
